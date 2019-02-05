@@ -1,0 +1,10 @@
+<launch>
+
+  <!-- Euler YPR (deg): -4.623 3.884 -38.333 -->
+  <node name="motive_ur_stf" pkg="tf2_ros" type="static_transform_publisher" args="0.581913 -0.119278 0.129842 -0.080685 0.067788 -0.669035 ur_base_link mocap"/>
+
+  <node name="motive_ur_tf_node" pkg="motive_ur_calib" type="tf_node.py" output="screen">
+    <param name="htm" type="string" value="0.994457,0.080412,0.067736,0.581913,-0.105098,0.778483,0.618805,-0.119278,-0.002972,-0.622494,0.782619,0.129842,0.000000,0.000000,0.000000,1.000000"/>
+  </node>
+
+</launch>

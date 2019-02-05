@@ -1,0 +1,5 @@
+geometry_msgs/Point[] markers
+geometry_msgs/Pose[] rigid_bodies
+---
+geometry_msgs/Point[] markers
+geometry_msgs/Pose[] rigid_bodies
