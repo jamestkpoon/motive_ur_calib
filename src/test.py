@@ -45,10 +45,12 @@ def broadcast_pose_TF(pose, parent_frame='ur_base_link', child_frame='tf_test'):
     tfbc_.sendTransform(t)
     
 rigid_body_name_ = 'Gear_big'
-rigid_body_pose_topic_ = '/natnet_client/rigid_bodies/' + rigid_body_name_ + '/pose'
 
-while True:
-    msg_ = rospy.wait_for_message(rigid_body_pose_topic_, PoseStamped).pose
-    req_ = MotiveTFRequest(rigid_bodies = [ msg_ ])
+def pose_cb(msg):
+    req_ = MotiveTFRequest(rigid_bodies = [ msg.pose ])
     rigid_body_pose_tf_ = svc_(req_).rigid_bodies[0]
     broadcast_pose_TF(rigid_body_pose_tf_, child_frame=rigid_body_name_+'_TF')
+
+rigid_body_pose_topic_ = '/natnet_client/rigid_bodies/' + rigid_body_name_ + '/pose'
+rospy.Subscriber(rigid_body_pose_topic_, PoseStamped, pose_cb)
+rospy.spin()
