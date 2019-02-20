@@ -2,6 +2,17 @@
 
 import numpy as np
 
+### get stuff from rec script
+
+from record_data import gripper_positions,gripper_rpyA, motive_samples_fp
+
+gripper_positions_ = np.asarray(gripper_positions)
+motive_samples = np.load(motive_samples_fp)
+
+### Optitrack -> robot base TF
+
+## offset TCP to centre of marker
+
 def euler_to_rotM(rpy):
     sin_ = np.sin(rpy); cos_ = np.cos(rpy)
     Ax_ = np.asarray([ 1, 0, 0, 0, cos_[0], -sin_[0], 0, sin_[0], cos_[0] ]).reshape(3,3)
@@ -13,19 +24,17 @@ def euler_to_rotM(rpy):
 def apply_rpy(rpy, P):
     return np.matmul(euler_to_rotM(rpy), P.T).T
 
+# should probably use a combination of gripper_rpyA and gripper_rpyB ?
+tcp_marker_offset = np.asarray([ 0.005, 0.0, 0.0 ])
+ur_marker_positions = gripper_positions_ + apply_rpy(gripper_rpyA, tcp_marker_offset)
+
 if __name__ == '__main__':
     
-    ## fit with data from recording script
-
-    from record_data import motive_samples_fp
-
-    samples_all_ = np.load(motive_samples_fp)
-    ur_tcp_positions = samples_all_[:,:3]
-    motive_samples = samples_all_[:,7:]
+    ## fit
         
     def transform_and_get_hypot_to_ur_positions(tf):
         P_ = tf[:3] + apply_rpy(tf[3:], motive_samples)
-        hypot_ = np.sqrt(np.sum(np.square(ur_tcp_positions-P_), axis=1))
+        hypot_ = np.sqrt(np.sum(np.square(ur_marker_positions-P_), axis=1))
         return hypot_, np.square(np.sum(hypot_))
         
     def rew_fn_singular(x):
@@ -45,8 +54,8 @@ if __name__ == '__main__':
 
     motive_ur_xyzrpy_ = minimize(rew_fn_singular, np.zeros(6)).x
     normalize_ang_ndarray(motive_ur_xyzrpy_[3:])
-    err2_ = np.mean(transform_and_get_hypot_to_ur_positions(motive_ur_xyzrpy_)[0])
-    print(' TF optimization finished. Mean re-projection error: %f' % err2_)
+    print('  Got motive -> UR transform:')
+    print(motive_ur_xyzrpy_)
         
     ## save        
 

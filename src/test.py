@@ -44,7 +44,7 @@ def broadcast_pose_TF(pose, parent_frame='ur_base_link', child_frame='tf_test'):
     t.transform.rotation = pose.orientation
     tfbc_.sendTransform(t)
     
-rigid_body_name_ = 'gear_big'
+rigid_body_name_ = 'Gear_big'
 rigid_body_pose_topic_ = '/natnet_client/rigid_bodies/' + rigid_body_name_ + '/pose'
 
 while True:
