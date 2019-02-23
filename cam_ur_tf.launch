@@ -1,0 +1,6 @@
+<launch>
+
+  <!-- Euler YPR (deg): 178.616 -34.972 -4.706 -->
+  <node name="ur_base_link_camera_stf" pkg="tf2_ros" type="static_transform_publisher" args="1.186109 -0.030900 0.580286 3.117438 -0.610371 -0.082139 ur_base_link camera"/>
+
+</launch>
