@@ -6,12 +6,13 @@ from geometry_msgs.msg import Point, Quaternion, Pose
 
 import numpy as np
 
-def ROSPt_to_4x1_arr(P):
-    return np.asarray([ P.x,P.y, P.z, 1.0]).reshape([4,1])
+#def ROSPt_to_4x1_arr(P):
+#    return np.asarray([ P.x,P.y, P.z, 1.0]).reshape([4,1])
 
 def ROSPts_to_4xN_arr(P):
     n_ = len(P); M_ = np.empty([4,n_])
-    for i in range(n_): M_[:,i] = ROSPt_to_4x1_arr(P[i]).ravel()
+    for i in range(n_):
+        M_[:,i] = [ P[i].x, P[i].y, P[i].z, 1.0 ]
     
     return M_
     
@@ -19,11 +20,7 @@ def x1_arr_to_ROSPt(M):
     return Point(x=M[0], y=M[1], z=M[2])
 
 def xN_arr_to_ROSPts(M):
-    P_ = []
-    for i in range(M.shape[1]):
-        P_.append(x1_arr_to_ROSPt(M[:,i]))
-           
-    return P_
+    return [ x1_arr_to_ROSPt(M[:,i]) for i in range(M.shape[1]) ]
     
 def ROSQuat_to_xyzw(q):
     return [ q.x, q.y, q.z, q.w ]
