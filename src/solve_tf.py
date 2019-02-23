@@ -24,10 +24,10 @@ def normalize_ang_ndarray(M):
         else: break
         
 def optimize_TF(err_fn, seed=np.zeros(6)):
-    def rew_fn_singular(x):
+    def err_fn_singular(x):
         return np.square(np.sum(err_fn(x)))
         
-    tf_opt_ = minimize(rew_fn_singular, seed).x
+    tf_opt_ = minimize(err_fn_singular, seed).x
     normalize_ang_ndarray(tf_opt_[3:])
     
     print(' TF optimization finished. Mean error: %f' % np.mean(err_fn(tf_opt_)))
@@ -104,4 +104,4 @@ if __name__ == '__main__':
     tf_node_str_ = '  <node name="motive_ur_tf_node" pkg="motive_ur_calib" type="tf_node.py" output="screen">\n' \
         + '    <param name="htm" type="string" value="' + htm_str_ + '"/>\n  </node>'
     
-    write_TF_roslaunch(pkg_dir+'motive_ur_tf.launch', motive_ur_xyzrpy_, extras = [ tf_node_str_ ])
+    write_TF_roslaunch(pkg_dir+'motive_ur_tf.launch', motive_ur_xyzrpy_, extras=[ tf_node_str_ ])
