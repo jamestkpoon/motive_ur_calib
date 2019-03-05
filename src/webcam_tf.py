@@ -4,15 +4,19 @@ import rospy
 from james_ur_kinematics.srv import *
 from record_data import move_to_random_pose, cast_input, pkg_dir
 
+from sensor_msgs.msg import Image
+import ros_numpy, cv2
+
 from solve_tf import *
 import numpy as np
 
-cam_res_H = 640
-cam_res_V = 480
+cam_topic = '/usb_cam/image_raw'
+cam_res_H = 1920
+cam_res_V = 1080
 cam_fov_H = 70.42 * np.pi/180.0
 cam_fov_V = 43.3 * np.pi/180.0
 
-tf_seed = [ 1.5, 0.0, 0.3, 0, 0.5, 3.1416 ]
+tf_seed = [ 1.5, 0.0, 0.3, 0.0, 0.5, 3.1416 ]
 
 if __name__ == '__main__':
     
@@ -29,22 +33,41 @@ if __name__ == '__main__':
     m2j_svc_ = rospy.ServiceProxy(m2j_topic_, MoveTo)
 
     ### record samples
+    
+    # image GUI (left-clicking)
+    u_in_ = -1; v_in_ = -1
+    def mouse_cb(event, x,y, flags,params):
+        if event == cv2.EVENT_LBUTTONDOWN:
+            global u_in_, v_in_
+            u_in_ = x; v_in_ = y
+    
+    window_name_ = 'webcam_tf.py'
+    cv2.startWindowThread(); cv2.namedWindow(window_name_); 
+    cv2.setMouseCallback(window_name_, mouse_cb)
 
     samples_ = []
     while True:
         # move robot
         j6_,p7_ = move_to_random_pose(ik_svc_, m2j_svc_)
-        # get position from user
-        u_in_ = cast_input(int, '  Horizontal px co-ordinate: ')
-        v_in_ = cast_input(int, '  Vertical   px co-ordinate: ')
-        samples_.append(p7_[:3] + [ u_in_, v_in_ ])
-        # continue?
+        # get image position of end-effector TCP
+#        u_in_ = cast_input(int, '  Horizontal px co-ordinate: ')
+#        v_in_ = cast_input(int, '  Vertical   px co-ordinate: ')        
+        u_in_ = -1; v_in_ = -1
+        while True:
+            img_ = ros_numpy.numpify(rospy.wait_for_message(cam_topic, Image))
+            cv2.imshow(window_name_, img_); cv2.waitKey(50)
+            if u_in_ != -1 and v_in_ != -1: break            
+        # append, then check if to continue
+        samples_.append(p7_[:3] + map(float, [ u_in_, v_in_ ]))
         in_ = raw_input('%d samples. Press Enter to record more, or input anything else to calibrate ...' % len(samples_))
         if in_ != '': break
         
-    samples_ = np.asarray(samples_); np.save(pkg_dir+'calib_data_camera.npy', samples_)
+    cv2.destroyWindow(window_name_)
+        
+    samples_ = np.asarray(samples_)
+    np.save(pkg_dir+'calib_data_camera.npy', samples_)
     
-    ### fit (assuming pinhole camera)
+    ### fit (assuming pinhole camera), and save
     
     if not ('samples_' in locals()): samples_ = np.load(pkg_dir+'calib_data_camera.npy')
     n_samples_ = samples_.shape[0]
@@ -73,8 +96,5 @@ if __name__ == '__main__':
                 
         return np.sqrt(np.sum(np.square(cam_uv_-uv_), axis=1))
         
-    cam_ur_xyzrpy_ = optimize_TF(get_tf_px_hypot, np.asarray(tf_seed))
-    
-    ### save
-    
-    write_TF_roslaunch(pkg_dir+'cam_ur_tf.launch', cam_ur_xyzrpy_, child_frame='camera')
+    tf_opt_ = optimize_TF(get_tf_px_hypot, np.asarray(tf_seed))
+    write_TF_roslaunch(pkg_dir+'cam_ur_tf.launch', tf_opt_, child_frame='camera')
