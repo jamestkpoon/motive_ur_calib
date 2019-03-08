@@ -73,6 +73,7 @@ if __name__ == '__main__':
         while True:
             motive_msg_ = get_loose_markers_msg()
             if not (mID in motive_msg_.ids):
+                print(motive_msg_.ids)
                 mID = cast_input(int, '  Please enter a marker ID: ')
             else:                
                 i_ = motive_msg_.ids.index(mID)

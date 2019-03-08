@@ -87,7 +87,7 @@ if __name__ == '__main__':
         P_ = tf[:3] + np.matmul(euler_to_rotM(tf[3:]), motive_samples_.T).T
         return np.sqrt(np.sum(np.square(ur_tcp_positions_-P_), axis=1))
 
-    motive_ur_xyzrpy_ = optimize_TF(get_tf_hypot)
+    tf_opt_ = optimize_TF(get_tf_hypot)
         
     ### save
 
@@ -100,8 +100,8 @@ if __name__ == '__main__':
         return htm_
           
     # ./tf_node.py instance
-    htm_str_ = flatten_matrix_to_string(xyzrpy_to_4x4HTM(motive_ur_xyzrpy_))
+    htm_str_ = flatten_matrix_to_string(xyzrpy_to_4x4HTM(tf_opt_))
     tf_node_str_ = '  <node name="motive_ur_tf_node" pkg="motive_ur_calib" type="tf_node.py" output="screen">\n' \
         + '    <param name="htm" type="string" value="' + htm_str_ + '"/>\n  </node>'
     
-    write_TF_roslaunch(pkg_dir+'motive_ur_tf.launch', motive_ur_xyzrpy_, extras=[ tf_node_str_ ])
+    write_TF_roslaunch(pkg_dir+'motive_ur_tf.launch', tf_opt_, extras=[ tf_node_str_ ])

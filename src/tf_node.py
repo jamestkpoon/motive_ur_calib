@@ -42,15 +42,15 @@ class MotiveTF_node():
         rospy.spin()
         
     def _tf_cb(self, req):
-        res_ = MotiveTFResponse()
+        res_ = MotiveTFResponse(markers=[], rigid_bodies=[])
         
         # marker positions
-        res_.markers = xN_arr_to_ROSPts(
-            np.matmul(self._htm, ROSPts_to_4xN_arr(req.markers)))
-        
+        if (len(req.markers) != 0):
+            res_.markers = xN_arr_to_ROSPts(
+                np.matmul(self._htm, ROSPts_to_4xN_arr(req.markers)))
+                
         # rigid body poses
-        n_ = len(req.rigid_bodies); res_.rigid_bodies = []
-        for i in range(n_):
+        for i in range(len(req.rigid_bodies)):
             quat_rot_adj_ = tf_conversions.transformations.quaternion_multiply(
                 ROSQuat_to_xyzw(req.rigid_bodies[i].orientation), self._rb_rot_adj)
             req_pose_rot_adj_ = Pose(position=req.rigid_bodies[i].position,
