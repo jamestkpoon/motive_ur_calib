@@ -50,11 +50,10 @@ class MotiveTF_node():
                 np.matmul(self._htm, ROSPts_to_4xN_arr(req.markers)))
                 
         # rigid body poses
-        for i in range(len(req.rigid_bodies)):
+        for rbp in req.rigid_bodies:
             quat_rot_adj_ = tf_conversions.transformations.quaternion_multiply(
-                ROSQuat_to_xyzw(req.rigid_bodies[i].orientation), self._rb_rot_adj)
-            req_pose_rot_adj_ = Pose(position=req.rigid_bodies[i].position,
-                orientation=Quaternion(*quat_rot_adj_))           
+                ROSQuat_to_xyzw(rbp.orientation), self._rb_rot_adj)
+            req_pose_rot_adj_ = Pose(position=rbp.position, orientation=Quaternion(*quat_rot_adj_))
             M_tf_ = np.matmul(self._htm, ROSPose_to_TM(req_pose_rot_adj_))
             res_.rigid_bodies.append(TM_to_ROSPose(M_tf_))
     
