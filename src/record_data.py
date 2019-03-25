@@ -13,7 +13,7 @@ motive_samples_fp = pkg_dir + 'calib_data_motive.npy'
 
 ### UR5 control
 
-px_r = [ 0.6, 0.7 ]; py_r = [ -0.2, 0.2 ]; pz_r = [ 0.1, 0.2 ]
+px_r = [ 0.6, 0.7 ]; py_r = [ -0.2, 0.1 ]; pz_r = [ 0.1, 0.2 ]
 rr_r = [ -np.pi/2, np.pi/2 ]; rp_r = [ 0.0, np.pi/8 ]; ry_r = [ -np.pi/6, np.pi/6 ]
 ur_move_time = 5.0
 
@@ -85,7 +85,7 @@ if __name__ == '__main__':
 
     ### actual data gettin'
     
-    n_samples_ = 20
+    n_samples_ = 10
     marker_readings_per_sample_ = 10
     
     motive_samps_all_ = np.empty([n_samples_,10])

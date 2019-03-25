@@ -11,12 +11,12 @@ from solve_tf import *
 import numpy as np
 
 cam_topic = '/usb_cam/image_raw'
-cam_res_H = 1920
-cam_res_V = 1080
+cam_res_H = 640
+cam_res_V = 480
 cam_fov_H = 70.42 * np.pi/180.0
 cam_fov_V = 43.3 * np.pi/180.0
 
-tf_seed = [ 1.5, 0.0, 0.3, 0.0, 0.5, 3.1416 ]
+tf_seed = [ 1.0, 0.0, 0.3, 0.0, 0.5, 3.1416 ]
 
 if __name__ == '__main__':
     
@@ -97,4 +97,5 @@ if __name__ == '__main__':
         return np.sqrt(np.sum(np.square(cam_uv_-uv_), axis=1))
         
     tf_opt_ = optimize_TF(get_tf_px_hypot, np.asarray(tf_seed))
+    tf_opt_[3:] *= -1 # ???
     write_TF_roslaunch(pkg_dir+'cam_ur_tf.launch', tf_opt_, child_frame='camera')
